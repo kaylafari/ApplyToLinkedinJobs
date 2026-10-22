@@ -1,0 +1,19 @@
+{
+  "status": "automatic_disqualification",
+  "run_id": "historical-example",
+  "note": "Card exclusion: outside_exact_New_York_NY",
+  "evidence": {
+    "card_exclusion_evidence": [
+      {
+        "quote": "New York City Metropolitan Area (On-site)",
+        "rule": "outside_exact_New_York_NY"
+      }
+    ]
+  },
+  "transitions": [
+    {
+      "old_status": "discovered",
+      "new_status": "automatic_disqualification"
+    }
+  ]
+}

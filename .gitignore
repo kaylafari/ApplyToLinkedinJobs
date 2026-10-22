@@ -1,0 +1,32 @@
+# Generated Python and local tool files
+__pycache__/
+*.py[cod]
+.venv/
+.DS_Store
+.env
+.env.*
+!.env.example
+
+# Private candidate sources and user answers
+**/references/JOB_APPLICATION_PROFILE.txt
+**/references/career-inventory.md
+**/references/master-resume.txt
+**/references/user-answers.md
+**/references/source-manifest.json
+**/references/historical-journal.json
+**/references/historical-import.json
+
+# Live application state, checkpoints, resumes and browser data
+state/
+linkedin-daily-state/
+artifacts/
+outputs/
+backups/
+*.lock
+*.pdf
+*.png
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.synctex.gz

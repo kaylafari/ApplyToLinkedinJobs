@@ -1,0 +1,4 @@
+interface:
+  display_name: "Daily LinkedIn Preparation"
+  short_description: "Prepare 15 tailored applications for Kayla’s review"
+  default_prompt: "Use $daily-linkedin-prep to prepare 15 eligible LinkedIn applications with verified resumes and answers for Kayla’s review."
