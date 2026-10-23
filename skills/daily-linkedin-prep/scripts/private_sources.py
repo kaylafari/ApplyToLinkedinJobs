@@ -4,6 +4,7 @@ import argparse
 import base64
 import binascii
 import fcntl
+import gzip
 import json
 import os
 from pathlib import Path
@@ -55,7 +56,12 @@ def validate_text(value):
 def decode_input(value):
     if not isinstance(value, str):
         raise ValueError('Private inputs must contain UTF-8 text.')
-    if value.startswith('base64:'):
+    if value.startswith('gzip-base64:'):
+        try:
+            value = gzip.decompress(base64.b64decode(value[12:], validate=True)).decode('utf-8')
+        except (binascii.Error, UnicodeError, ValueError, OSError, EOFError):
+            raise ValueError('Compressed private input must be valid gzip-base64 of UTF-8 text.') from None
+    elif value.startswith('base64:'):
         try:
             value = base64.b64decode(value[7:], validate=True).decode('utf-8')
         except (binascii.Error, UnicodeError, ValueError):

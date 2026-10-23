@@ -49,3 +49,5 @@ No live cloud environment, schedule, browser login, or private variable value is
 cd skills/daily-linkedin-prep
 python3 -m unittest discover -s scripts -p 'test_*.py'
 ```
+
+For size-limited single-line editors, `gzip-base64:` followed by base64 of gzip-compressed UTF-8 bytes is also supported losslessly. Keep compressed values private.

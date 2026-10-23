@@ -1,4 +1,5 @@
 import base64
+import gzip
 import contextlib
 import io
 import json
@@ -64,8 +65,16 @@ class PrivateSourceTests(unittest.TestCase):
         self.assertEqual((self.private / 'master-resume.txt').read_bytes(),
                          plain['LINKEDIN_MASTER_RESUME'].encode())
 
+    def test_compressed_input_round_trip(self):
+        plain = dict(self.env)
+        for key in ['LINKEDIN_CANDIDATE_CONTEXT', 'LINKEDIN_MASTER_RESUME']:
+            self.env[key] = 'gzip-base64:' + base64.b64encode(gzip.compress(self.env[key].encode())).decode()
+        prepare(self.env, self.repo)
+        prepare(plain, self.repo)
+        self.assertEqual((self.private / 'candidate-context.md').read_bytes(), plain['LINKEDIN_CANDIDATE_CONTEXT'].encode())
+
     def test_invalid_encoded_input_is_rejected_without_values_or_writes(self):
-        for value in ['base64:private-invalid-SECRET', 'base64:/w==', 'base64:']:
+        for value in ['base64:private-invalid-SECRET', 'base64:/w==', 'base64:', 'gzip-base64:', 'gzip-base64:/w==']:
             with self.subTest(value=value), self.assertRaises(ValueError) as result:
                 prepare({**self.env, 'LINKEDIN_CANDIDATE_CONTEXT': value}, self.repo)
             self.assertNotIn(value, str(result.exception))
