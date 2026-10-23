@@ -6,7 +6,9 @@ authorized preparation run; coding/setup requests do not start applications.
 
 Resolve/read the two private applicant sources with private_sources.py prepare,
 preserving newer approved answers and the master baseline. Restore real duplicate
-history; never replace it with empty state. Retain the skill's eligibility rules.
+history using LINKEDIN_APPLICATION_HISTORY or an environment-visible
+LINKEDIN_APPLICATION_HISTORY_PATH and the helper's returned history path; never
+replace it with empty state. Retain the skill's eligibility rules.
 The objective remains 15 distinct eligible applications unless the user specifies
 another target, but packet counts are not live prepared-application counts.
 

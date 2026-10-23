@@ -53,7 +53,12 @@ outside-checkout files survive cloud replacement. Missing/conflicting inputs blo
 live preparation, not code/tests. Export updated sources/state privately before exit.
 
 Restore real prior-job history and reconcile ownership/in-flight effects before
-live work. Never create empty history to pass checks, clear duplicates, revive a
+live work. Use the helper's application_history_path, provisioned through private
+LINKEDIN_APPLICATION_HISTORY contents or an environment-visible
+LINKEDIN_APPLICATION_HISTORY_PATH. A laptop-only file path does not transfer history.
+Missing desktop browser access or a Notion tracker URL does not block cloud packet
+preparation from accessible job evidence; those integrations are checked for their
+own stages. Never create empty history to pass checks, clear duplicates, revive a
 cancelled run, count an old draft as new, or reopen a submitted/human-blocked job as
 fresh. Keep daily discovery separate from recovery; retain target/count on retries.
 All live browser actions belong to one parent through supported authenticated tools.

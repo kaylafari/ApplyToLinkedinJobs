@@ -15,12 +15,16 @@ First confirm the updated files are present, including scripts/cloud_handoff.py,
 references/hybrid-workflow.md and references/manual-transfer.md under the skill.
 Load workflow code directly from the selected repository branch. If the files are
 missing, report that the checkout uses an older branch/commit; do not require a
-workflow-code ZIP. Preserve existing private sources and history.
+workflow-code ZIP or silently fall back to the legacy browser-based workflow.
+Preserve existing private sources and history.
 
 Resolve the provisioned private applicant sources through private_sources.py and
 read the two returned files privately. Preserve newer approved answers and the
-unchanged master baseline. Restore/check real prior-job history; do not invent
-empty history or reapply to known submissions. If required sources/history/access
+unchanged master baseline. Restore/check real prior-job history using
+LINKEDIN_APPLICATION_HISTORY (private ledger JSON contents) or
+LINKEDIN_APPLICATION_HISTORY_PATH (an existing environment-visible file), and use
+the helper's returned history path. Do not invent empty history or reapply to known
+submissions. A path on the laptop is not itself a transfer. If required sources/history/access
 are unavailable, report the exact blocker rather than fabricate readiness.
 
 Research actual current jobs through accessible supported sources and apply the
@@ -35,6 +39,12 @@ for the computer browser just to produce packets. Mark unseen forms uninspected,
 prepare only source-grounded proposed answers, and flag unknown personal answers.
 Do not claim answers were validated against a live form that was not inspected.
 Browser-dependent completion waits for the supported local coordinating agent.
+
+Notion configuration and desktop browser controls are not prerequisites for this
+packet-only pilot. `notion_tracker_configured=false` means the tracker URL was not
+provided; it is not a failed login and must not block ZIP preparation. If actual
+job descriptions cannot be researched through supported accessible sources,
+report job-source access as the blocker rather than demanding desktop controls.
 
 Create three immutable versioned packets with tailored resume assets and all
 required QA reports. Compile, extract text, render and inspect every resume page
