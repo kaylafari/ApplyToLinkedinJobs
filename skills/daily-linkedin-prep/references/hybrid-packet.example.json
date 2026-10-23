@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "applicant_id": "synthetic-applicant-id",
+  "revision": 1,
+  "prepared_at": "2026-10-22T12:00:00Z",
+  "profile_version": "synthetic-profile-v1",
+  "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "job": {
+    "linkedin_job_id": "1234567890",
+    "company": "Example Company",
+    "title": "Software Engineer",
+    "url": "https://www.linkedin.com/jobs/view/1234567890",
+    "application_url": "https://jobs.example.com/1234567890",
+    "ats_identity": null
+  },
+  "answers": [
+    {
+      "question": "Example question requiring an approved personal answer",
+      "value": null,
+      "sources": [],
+      "confidence": "low",
+      "requires_review": true
+    }
+  ],
+  "form": {
+    "coverage": "uninspected",
+    "observed_at": null,
+    "fingerprint": null,
+    "questions": []
+  },
+  "assets": []
+}

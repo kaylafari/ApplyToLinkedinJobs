@@ -39,6 +39,24 @@ Other platforms may provision equivalent packages themselves. Unit tests use syn
 
 ## Live browser and handoff requirements
 
+Cloud/local runs use [hybrid-workflow.md](../skills/daily-linkedin-prep/references/hybrid-workflow.md).
+Cloud creates immutable packets; the local coordinating agent uses the user's
+actual computer browser while awake, online and connected through supported tools.
+Use [the local start/resume prompt](../automation/local-browser-task-prompt.md).
+The shared `cloud_handoff.py` helper validates/packages files and checkpoints work;
+it does not supply browser control, file transport or background execution.
+
+The selected handoff is [manual download and transfer](../skills/daily-linkedin-prep/references/manual-transfer.md):
+prepare a private ZIP plus SHA256, download it through an actual supported host
+interface, then verify/extract/import on the computer. No shared drive is needed.
+Cloud files and archives do not prove completed download or durable preservation.
+Keep mutable execution state on one private local POSIX
+filesystem, not a sync drive. Default to one held application, finite claim/time/
+attempt budgets and an explicit supported token budget. A non-submitting local
+pilot must pass before long local work. Cloud background execution and its limits
+also require an actual supported host mechanism; this setup script does not start
+a daemon, resume a paused schedule, or keep an ended agent session running.
+
 Before starting, inspect the cloud task's actual supported browser capabilities and authentication. Desktop Edge sessions, open drafts, and login cookies are not automatically transferred. Network access alone does not establish browser access or a logged-in LinkedIn/Notion session. If a required capability is absent, report it; do not manufacture readiness or bypass account/permission restrictions. The helper scripts are offline and do not add a browser driver.
 
 Use one parent browser executor. Preserve the skill's no-submission boundary and distinct application/PDF pairing. Privately export updated context and application state before ending a task or replacing a container. A new cloud task may lack files outside the repo, and a stale environment value must never replace newer learned answers. Update the private value from the current context before provisioning a fresh task. The master resume remains a separate baseline. Never commit or publish these exports to preserve them.
