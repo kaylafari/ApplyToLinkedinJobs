@@ -18,6 +18,13 @@ missing, report that the checkout uses an older branch/commit; do not require a
 workflow-code ZIP or silently fall back to the legacy browser-based workflow.
 Preserve existing private sources and history.
 
+Do not make an unconditional Git fetch a prerequisite. If the checkout already
+contains the verified merged workflow and required files, run the pilot from that
+checkout. A failed optional fetch is a repository-refresh warning, not a reason to
+stop packet preparation. If an update is actually needed, use supported GitHub
+tools when available; never bypass the configured network proxy. Use supported
+web/search tools for public job research when shell networking is unavailable.
+
 Resolve the provisioned private applicant sources through private_sources.py and
 read the two returned files privately. Preserve newer approved answers and the
 unchanged master baseline. Restore/check real prior-job history using

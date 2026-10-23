@@ -80,3 +80,29 @@ python3 -m unittest discover -s scripts -p 'test_*.py'
 ```
 
 For size-limited single-line editors, `gzip-base64:` followed by base64 of gzip-compressed UTF-8 bytes is also supported losslessly. Keep compressed values private.
+
+## Startup troubleshooting
+
+- A refused connection to the configured Git proxy is a host networking issue,
+  not evidence that the workflow code is missing. When the checkout already has
+  the verified merged workflow, an optional fetch failure must not prevent the
+  packet pilot. Do not repeatedly fetch or disable/bypass the proxy. Supported
+  GitHub and web/search tools may still work independently of shell networking.
+- Saving a value in Personal vault is not sufficient if the selected environment
+  does not request that key, or the running task was created from an older saved
+  configuration. Verify the variable is requested by the exact environment, its
+  Personal value is saved, and the published configuration is selected when a new
+  task starts. Runtime reports only the keys/values actually made available to
+  that task; it cannot see an unpublished environment draft or all vault entries.
+- For a one-time manual history transfer, attach the actual `ledger.json` to the
+  pilot chat using its supported private file-upload interface. The agent must
+  materialize it as a private file in its own environment and set
+  `LINKEDIN_APPLICATION_HISTORY_PATH` to that actual local cloud path for the helper
+  commands. An upload reference alone is not a filesystem path. Do not print the
+  ledger or substitute an empty history. No browser access or Notion URL is needed
+  to accept the history file or prepare packet-only work.
+- For repeatable new environments, prefer privately supplying the real JSON via
+  `LINKEDIN_APPLICATION_HISTORY` using the same supported lossless encoding as the
+  applicant sources. Remove an obsolete `LINKEDIN_APPLICATION_HISTORY_PATH` when
+  switching to this contents method; a defined but missing path is an error. Never
+  commit actual history, encoded values, tracker IDs or credentials into this repo.
