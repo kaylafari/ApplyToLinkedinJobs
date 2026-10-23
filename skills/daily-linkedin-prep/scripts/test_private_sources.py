@@ -1,3 +1,4 @@
+import base64
 import contextlib
 import io
 import json
@@ -51,6 +52,24 @@ class PrivateSourceTests(unittest.TestCase):
         prepare(self.env, self.repo)
         self.assertEqual((self.private / 'candidate-context.md').read_bytes(),
                          self.env['LINKEDIN_CANDIDATE_CONTEXT'].encode('utf-8'))
+
+    def test_single_line_encoded_inputs_round_trip_and_match_existing_plain_text(self):
+        plain = dict(self.env)
+        for key in ['LINKEDIN_CANDIDATE_CONTEXT', 'LINKEDIN_MASTER_RESUME']:
+            self.env[key] = 'base64:' + base64.b64encode(self.env[key].encode()).decode()
+        prepare(self.env, self.repo)
+        prepare(plain, self.repo)
+        self.assertEqual((self.private / 'candidate-context.md').read_bytes(),
+                         plain['LINKEDIN_CANDIDATE_CONTEXT'].encode())
+        self.assertEqual((self.private / 'master-resume.txt').read_bytes(),
+                         plain['LINKEDIN_MASTER_RESUME'].encode())
+
+    def test_invalid_encoded_input_is_rejected_without_values_or_writes(self):
+        for value in ['base64:private-invalid-SECRET', 'base64:/w==', 'base64:']:
+            with self.subTest(value=value), self.assertRaises(ValueError) as result:
+                prepare({**self.env, 'LINKEDIN_CANDIDATE_CONTEXT': value}, self.repo)
+            self.assertNotIn(value, str(result.exception))
+            self.assertFalse(self.private.exists())
 
     def test_missing_input_writes_nothing(self):
         del self.env['LINKEDIN_MASTER_RESUME']

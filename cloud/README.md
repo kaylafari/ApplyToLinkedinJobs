@@ -12,7 +12,7 @@ In the cloud environment or your **Personal vault**, request/supply these direct
 | `LINKEDIN_MASTER_RESUME` | Full UTF-8 contents of your separate master-resume.txt baseline. |
 | `LINKEDIN_NOTION_TRACKER_URL` | Authorized Notion tracker URL for live tracking. |
 
-The first two values are **multiline text, not file paths**. Paste the text into the private variable UI, not the public task prompt or setup script. Do not echo, dump, or trace your environment. `.env.example` documents key names with empty values only; this repo never loads a `.env` file automatically. Keep real `.env` files private and untracked.
+The first two values are **document contents, not file paths**. Use raw multiline UTF-8 where supported. For single-line editors, use `base64:` followed by base64-encoded UTF-8 file bytes (one uninterrupted line); the helper decodes them losslessly. Base64 is transport encoding, not encryption: keep the value private just like the original text. Paste the text into the private variable UI, not the public task prompt or setup script. Do not echo, dump, or trace your environment. `.env.example` documents key names with empty values only; this repo never loads a `.env` file automatically. Keep real `.env` files private and untracked.
 
 Optional `LINKEDIN_PRIVATE_DIR` selects an absolute private directory (default `~/.local/share/linkedin-prep`). Optional `LINKEDIN_STATE_DIR` selects the actual privately restored state directory (default `state/` under the private directory). Both must be outside the checkout. For migration, restore the real existing ledger/history and artifacts privately before live work; candidate text alone does not provide duplicate protection.
 

@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Provision private text inputs from environment variables; never print their values."""
 import argparse
+import base64
+import binascii
 import fcntl
 import json
 import os
@@ -50,6 +52,18 @@ def validate_text(value):
         raise ValueError('Private inputs must be valid UTF-8 text.') from None
 
 
+def decode_input(value):
+    if not isinstance(value, str):
+        raise ValueError('Private inputs must contain UTF-8 text.')
+    if value.startswith('base64:'):
+        try:
+            value = base64.b64decode(value[7:], validate=True).decode('utf-8')
+        except (binascii.Error, UnicodeError, ValueError):
+            raise ValueError('Encoded private input must be valid base64 of UTF-8 text.') from None
+    validate_text(value)
+    return value
+
+
 def prepare(env, repo_root, check_only=False):
     private, state = configuration(env, repo_root)
     # Check all values before creating any files. Keep existing learned answers intact.
@@ -59,7 +73,7 @@ def prepare(env, repo_root, check_only=False):
         saved = existing_text(path)
         supplied = env.get(key)
         if supplied is not None:
-            validate_text(supplied)
+            supplied = decode_input(supplied)
             if saved is not None and saved != supplied:
                 raise ValueError('Saved private sources differ from supplied inputs. Preserve and reconcile them; no files were overwritten.')
         value = saved if saved is not None else supplied
