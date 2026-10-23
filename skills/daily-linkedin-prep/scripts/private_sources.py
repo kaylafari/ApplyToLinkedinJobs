@@ -70,6 +70,56 @@ def decode_input(value):
     return value
 
 
+def validate_history(value):
+    def reject_constant(_):
+        raise ValueError('Application history must use finite JSON values.')
+
+    def unique_object(pairs):
+        result = {}
+        for key, item in pairs:
+            if key in result:
+                raise ValueError('Application history cannot contain duplicate JSON keys.')
+            result[key] = item
+        return result
+
+    try:
+        history = json.loads(value, parse_constant=reject_constant, object_pairs_hook=unique_object)
+    except (ValueError, TypeError):
+        raise ValueError('Application history must be a JSON ledger with a jobs object; no values were logged.') from None
+    if (not isinstance(history, dict) or type(history.get('version', 1)) is not int or history.get('version', 1) != 1
+            or not isinstance(history.get('jobs'), dict)
+            or any(not key.strip() or not isinstance(job, dict) for key, job in history['jobs'].items())):
+        raise ValueError('Application history must be a supported JSON ledger with a jobs object.')
+
+
+def history_source(env, repo_root, state):
+    """An optional private snapshot or an existing path visible to this machine."""
+    explicit_path = env.get('LINKEDIN_APPLICATION_HISTORY_PATH')
+    if explicit_path is not None:
+        if not explicit_path.strip():
+            raise ValueError('Configured application-history path must not be empty.')
+        path = Path(explicit_path).expanduser()
+    else:
+        # A restored live ledger takes precedence over a cached environment snapshot.
+        ledger = state / 'ledger.json'
+        path = ledger if ledger.exists() or ledger.is_symlink() else state / 'application-history.json'
+    if not path.is_absolute() or path.resolve().is_relative_to(Path(repo_root).resolve()):
+        raise ValueError('Application-history path must be absolute, outside the checkout and accessible in this environment.')
+    saved = existing_text(path)
+    if explicit_path is not None and saved is None:
+        raise ValueError('Application-history path is not present in this environment; a laptop path is not automatically cloud-accessible.')
+    supplied = env.get('LINKEDIN_APPLICATION_HISTORY')
+    if supplied is not None:
+        supplied = decode_input(supplied)
+        validate_history(supplied)
+        if saved is not None and saved != supplied:
+            raise ValueError('Saved application history differs from supplied history. Preserve and reconcile it; no history was overwritten.')
+    value = saved if saved is not None else supplied
+    if value is not None:
+        validate_history(value)
+    return path, value
+
+
 def prepare(env, repo_root, check_only=False):
     private, state = configuration(env, repo_root)
     # Check all values before creating any files. Keep existing learned answers intact.
@@ -88,6 +138,11 @@ def prepare(env, repo_root, check_only=False):
         if check_only and saved is None:
             raise ValueError('Private files are not prepared. Run the prepare command first.')
         desired[path] = value
+    history_path, history = history_source(env, repo_root, state)
+    if history is not None:
+        if check_only and not history_path.is_file():
+            raise ValueError('Application history is not prepared. Run the prepare command first.')
+        desired[history_path] = history
     if not check_only:
         private.mkdir(parents=True, exist_ok=True, mode=0o700)
         os.chmod(private, 0o700)
@@ -102,7 +157,8 @@ def prepare(env, repo_root, check_only=False):
             for path, value in desired.items():
                 if path.exists():
                     continue
-                fd, tmp = tempfile.mkstemp(prefix='.source-', dir=private)
+                path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+                fd, tmp = tempfile.mkstemp(prefix='.source-', dir=path.parent)
                 try:
                     with os.fdopen(fd, 'w', encoding='utf-8', newline='') as stream:
                         stream.write(value)
@@ -117,6 +173,8 @@ def prepare(env, repo_root, check_only=False):
         'candidate_context_path': str(private / SOURCES['LINKEDIN_CANDIDATE_CONTEXT']),
         'master_resume_path': str(private / SOURCES['LINKEDIN_MASTER_RESUME']),
         'state_dir': str(state),
+        'application_history_configured': history is not None,
+        'application_history_path': str(history_path) if history is not None else None,
         'notion_tracker_configured': bool(env.get('LINKEDIN_NOTION_TRACKER_URL', '').strip()),
     }
 

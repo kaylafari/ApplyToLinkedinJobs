@@ -86,6 +86,63 @@ class PrivateSourceTests(unittest.TestCase):
             prepare(self.env, self.repo)
         self.assertFalse(self.private.exists())
 
+    def test_history_environment_restores_private_snapshot_without_logging_contents(self):
+        history = json.dumps({'version': 1, 'jobs': {'123': {'status': 'submitted', 'note': 'SYNTHETIC_PRIVATE_HISTORY'}}})
+        self.env['LINKEDIN_APPLICATION_HISTORY'] = 'gzip-base64:' + base64.b64encode(gzip.compress(history.encode())).decode()
+        result = prepare(self.env, self.repo)
+        path = Path(result['application_history_path'])
+        self.assertEqual(path.read_text(), history)
+        self.assertEqual(path.stat().st_mode & 0o777, 0o600)
+        self.assertTrue(result['application_history_configured'])
+        self.assertNotIn('SYNTHETIC_PRIVATE_HISTORY', json.dumps(result))
+        prepare(self.env, self.repo, check_only=True)
+
+    def test_history_path_reuses_existing_cloud_visible_file_without_copying(self):
+        history = self.root / 'restored-ledger.json'
+        history.write_text(json.dumps({'version': 1, 'jobs': {'123': {'status': 'submitted'}}}))
+        self.env['LINKEDIN_APPLICATION_HISTORY_PATH'] = str(history)
+        result = prepare(self.env, self.repo)
+        self.assertEqual(result['application_history_path'], str(history))
+        self.assertFalse((self.private / 'state/application-history.json').exists())
+
+    def test_missing_laptop_history_path_fails_before_creating_sources(self):
+        self.env['LINKEDIN_APPLICATION_HISTORY_PATH'] = str(self.root / 'missing-on-this-machine.json')
+        with self.assertRaisesRegex(ValueError, 'not present in this environment'):
+            prepare(self.env, self.repo)
+        self.assertFalse(self.private.exists())
+
+    def test_stale_history_environment_never_overwrites_newer_restored_ledger(self):
+        self.env['LINKEDIN_APPLICATION_HISTORY'] = json.dumps({'version': 1, 'jobs': {}})
+        prepare(self.env, self.repo)
+        ledger = self.private / 'state/ledger.json'
+        current = json.dumps({'version': 1, 'jobs': {'123': {'status': 'submitted'}}})
+        ledger.write_text(current)
+        with self.assertRaisesRegex(ValueError, 'no history was overwritten'):
+            prepare(self.env, self.repo)
+        self.assertEqual(ledger.read_text(), current)
+
+    def test_invalid_history_payload_and_repo_paths_are_rejected_before_writes(self):
+        for value in ('not-json', '[]', '{"jobs": []}', '{"version": 2, "jobs": {}}',
+                      '{"jobs": {}, "score": NaN}', '{"jobs": {"123": {"status": "submitted"}, "123": {}}}'):
+            with self.subTest(value=value), self.assertRaises(ValueError):
+                prepare({**self.env, 'LINKEDIN_APPLICATION_HISTORY': value}, self.repo)
+            self.assertFalse(self.private.exists())
+        with self.assertRaises(ValueError):
+            prepare({**self.env, 'LINKEDIN_APPLICATION_HISTORY_PATH': str(self.repo / 'ledger.json')}, self.repo)
+
+    def test_absent_history_is_reported_without_inventing_an_empty_ledger(self):
+        result = prepare(self.env, self.repo)
+        self.assertFalse(result['application_history_configured'])
+        self.assertIsNone(result['application_history_path'])
+        self.assertFalse((self.private / 'state/application-history.json').exists())
+
+    def test_check_only_does_not_materialize_history(self):
+        prepare(self.env, self.repo)
+        self.env['LINKEDIN_APPLICATION_HISTORY'] = json.dumps({'version': 1, 'jobs': {}})
+        with self.assertRaisesRegex(ValueError, 'history is not prepared'):
+            prepare(self.env, self.repo, check_only=True)
+        self.assertFalse((self.private / 'state/application-history.json').exists())
+
     def test_empty_nul_and_invalid_unicode_write_nothing(self):
         for value in ['', '  \n', 'text\0hidden', '\ud800']:
             with self.subTest(value=repr(value)), self.assertRaises(ValueError):

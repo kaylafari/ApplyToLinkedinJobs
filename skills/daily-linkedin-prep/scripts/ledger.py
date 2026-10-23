@@ -258,6 +258,8 @@ def transact(path, args):
         if state.get("version") != 1:
             raise ValueError("Unsupported ledger version.")
         command = args.command
+        if state.get("hybrid_owner") and command not in {"status", "audit-pairs"}:
+            raise ValueError("Hybrid browser queue owns this history. Stop/reconcile it and release its interlock before legacy mutations.")
         if command == "status":
             if getattr(args, "summary", False):
                 owner = state.get("owner")
